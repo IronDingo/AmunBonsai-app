@@ -6,7 +6,7 @@ import { PlantGroups } from './pages/PlantGroups';
 import { Calendar } from './components/Calendar/Calendar';
 import './styles/app.css';
 
-function App() {
+const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('tasks');
     return saved ? JSON.parse(saved).map(deserializeTask) : [];
@@ -83,6 +83,26 @@ function App() {
     setTasks(prev => prev.filter(task => task.id !== taskId));
   };
 
+  const handleTaskComplete = (taskId: string, type: TaskType, plantId: string) => {
+    const now = new Date();
+    // Update task
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    
+    // Update plant's last watered/fertilized date
+    setGroups(groups.map(group => ({
+      ...group,
+      plants: group.plants.map(plant =>
+        plant.id === plantId
+          ? {
+              ...plant,
+              lastWatered: type === TaskType.Water ? now : plant.lastWatered,
+              lastFertilized: type === TaskType.Fertilize ? now : plant.lastFertilized,
+            }
+          : plant
+      ),
+    })));
+  };
+
   const getAllPlants = () => groups.flatMap(group => group.plants);
 
   return (
@@ -94,7 +114,17 @@ function App() {
           <Link to="/calendar">Calendar</Link>
         </nav>
         <Routes>
-          <Route path="/" element={<HomePage tasks={tasks} groups={groups} />} />
+          <Route 
+            path="/" 
+            element={
+              <HomePage 
+                tasks={tasks} 
+                groups={groups} 
+                onTaskComplete={handleTaskComplete}
+                onTaskDelete={handleDeleteTask}
+              />
+            } 
+          />
           <Route
             path="/plants"
             element={

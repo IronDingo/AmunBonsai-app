@@ -1,13 +1,16 @@
 import React from 'react';
-import { Task, PlantGroup } from '../types/models';
-import { format, isAfter } from 'date-fns';
+import { Task, PlantGroup, TaskType } from '../types/models';
+import { format, isToday, isTomorrow, isThisWeek } from 'date-fns';
+import { TaskColors } from '../constants/taskColors';
 
-interface HomeProps {
+interface HomePageProps {
   tasks: Task[];
   groups: PlantGroup[];
+  onTaskComplete: (taskId: string, type: TaskType, plantId: string) => void;
+  onTaskDelete: (taskId: string) => void;
 }
 
-const HomePage: React.FC<HomeProps> = ({ tasks, groups }) => {
+const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTaskDelete }) => {
   const getPlantName = (plantId: string) => {
     for (const group of groups) {
       const plant = group.plants.find(p => p.id === plantId);
@@ -16,39 +19,85 @@ const HomePage: React.FC<HomeProps> = ({ tasks, groups }) => {
     return 'Unknown Plant';
   };
 
-  const overdueTasks = tasks.filter(task => isAfter(new Date(), task.date));
-  const upcomingTasks = tasks
-    .filter(task => !isAfter(new Date(), task.date))
-    .slice(0, 5);
+  const sortedTasks = [...tasks].sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  return (
-    <div className="home-page">
-      <h1>Plant Care Dashboard</h1>
-      
-      {overdueTasks.length > 0 && (
-        <div className="overdue-tasks">
-          <h2>Overdue Tasks</h2>
-          {overdueTasks.map(task => (
-            <div key={task.id} className="task-card overdue">
-              <h3>{getPlantName(task.plantId)} - {task.type}</h3>
-              <p>Due: {format(task.date, 'MMM d, yyyy')}</p>
+  const groupedTasks = {
+    today: sortedTasks.filter(task => isToday(task.date)),
+    tomorrow: sortedTasks.filter(task => isTomorrow(task.date)),
+    thisWeek: sortedTasks.filter(task => isThisWeek(task.date) && !isToday(task.date) && !isTomorrow(task.date)),
+    later: sortedTasks.filter(task => !isThisWeek(task.date))
+  };
+
+  const renderTaskGroup = (tasks: Task[], title: string) => {
+    if (tasks.length === 0) return null;
+
+    return (
+      <div className="task-group">
+        <h2>{title}</h2>
+        <div className="task-list">
+          {tasks.map(task => (
+            <div 
+              key={task.id} 
+              className="home-task-card"
+              style={{ borderLeftColor: TaskColors[task.type] }}
+            >
+              <div className="task-main">
+                <div className="task-header">
+                  <span className="plant-name">{getPlantName(task.plantId)}</span>
+                  <span className="task-date">{format(task.date, 'MMM d')}</span>
+                </div>
+                <div className="task-type">{task.type}</div>
+                {task.notes && <div className="task-notes">{task.notes}</div>}
+              </div>
+              <div className="task-actions">
+                <button 
+                  className="action-button complete"
+                  onClick={() => onTaskComplete(task.id, task.type, task.plantId)}
+                >
+                  ✓
+                </button>
+                <button 
+                  className="action-button delete"
+                  onClick={() => onTaskDelete(task.id)}
+                >
+                  ×
+                </button>
+              </div>
             </div>
           ))}
         </div>
-      )}
+      </div>
+    );
+  };
 
-      <div className="upcoming-tasks">
-        <h2>Upcoming Tasks</h2>
-        {upcomingTasks.map(task => (
-          <div key={task.id} className="task-card">
-            <h3>{getPlantName(task.plantId)} - {task.type}</h3>
-            <p>Due: {format(task.date, 'MMM d, yyyy')}</p>
+  return (
+    <div className="home-page">
+      <div className="home-header">
+        <h1>Welcome to BonsaiApp</h1>
+        <div className="task-summary">
+          <div className="summary-card">
+            <span className="count">{groupedTasks.today.length}</span>
+            <span className="label">Today</span>
           </div>
-        ))}
+          <div className="summary-card">
+            <span className="count">{groupedTasks.tomorrow.length}</span>
+            <span className="label">Tomorrow</span>
+          </div>
+          <div className="summary-card">
+            <span className="count">{groupedTasks.thisWeek.length}</span>
+            <span className="label">This Week</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="tasks-container">
+        {renderTaskGroup(groupedTasks.today, "Today's Tasks")}
+        {renderTaskGroup(groupedTasks.tomorrow, "Tomorrow's Tasks")}
+        {renderTaskGroup(groupedTasks.thisWeek, "This Week")}
+        {renderTaskGroup(groupedTasks.later, "Upcoming")}
       </div>
     </div>
   );
 };
 
-export { HomePage };
 export default HomePage;
