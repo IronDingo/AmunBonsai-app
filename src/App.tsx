@@ -79,6 +79,10 @@ function App() {
     }
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+
   const getAllPlants = () => groups.flatMap(group => group.plants);
 
   return (
@@ -113,6 +117,7 @@ function App() {
                 plants={getAllPlants()}
                 onTaskClick={(task) => console.log('Task clicked:', task)}
                 onAddTask={handleAddTask}
+                onDeleteTask={handleDeleteTask}
               />
             }
           />

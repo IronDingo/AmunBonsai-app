@@ -7,9 +7,10 @@ interface CalendarPageProps {
   plants: Plant[];
   onTaskClick: (task: Task) => void;
   onAddTask: (task: Task) => void;
+  onDeleteTask: (taskId: string) => void;  // Updated to match App.tsx
 }
 
-const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, plants, onTaskClick, onAddTask }) => {
+const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, plants, onTaskClick, onAddTask, onDeleteTask }) => {
   return (
     <div className="calendar-page">
       <h1>Calendar</h1>
@@ -18,6 +19,7 @@ const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, plants, onTaskClick,
         plants={plants}
         onTaskClick={onTaskClick}
         onAddTask={onAddTask}
+        onDeleteTask={onDeleteTask}  // Now correctly matches the expected type
       />
     </div>
   );

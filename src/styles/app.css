@@ -56,6 +56,12 @@ h1 {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  background: white;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+  background: #f5f5f5;
 }
 
 .day-number {
@@ -70,14 +76,43 @@ h1 {
 }
 
 .task-item {
-  padding: 2px 4px;
-  margin: 2px 0;
-  background: #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 4px 0;
+  background: #f9f9f9;
   border-left: 3px solid;
-  border-radius: 2px;
+  border-radius: 4px;
+}
+
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-content span {
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.task-notes {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.task-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.button-small {
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  min-width: auto;
 }
 
 .task-indicators {
