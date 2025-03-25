@@ -51,22 +51,24 @@ h1 {
 
 .calendar-day {
   border: 1px solid #ddd;
-  padding: 10px;
-  min-height: 80px;
+  padding: 8px;
+  min-height: 100px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   background: white;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .calendar-day:hover {
-  background: #f5f5f5;
+  background: #f8f9fa;
 }
 
 .day-number {
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
 }
 
 .task-list {
@@ -120,12 +122,89 @@ h1 {
   gap: 4px;
   flex-wrap: wrap;
   margin-top: 4px;
+  padding: 4px;
 }
 
 .task-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+}
+
+.task-indicator {
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.task-indicator:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.task-popup {
+  position: fixed;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 12px;
+  min-width: 200px;
+  z-index: 1000;
+  animation: popup 0.2s ease;
+}
+
+.task-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.task-popup-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.task-popup .action-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 4px;
+  background: var(--secondary);
+  color: white;
+}
+
+.task-popup .action-button.delete {
+  background: #dc3545;
+}
+
+.task-popup .action-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Plant Groups Styles */
@@ -378,7 +457,6 @@ h1 {
   object-fit: cover;
   border-radius: 4px;
 }
-
 
 .plant-info strong {
   color: #666;

@@ -12,9 +12,15 @@ interface CalendarProps {
     onDeleteTask: (taskId: string) => void;  // Add this prop
 }
 
+interface TaskPopupInfo {
+    task: Task;
+    position: { x: number; y: number };
+}
+
 export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, onAddTask, onDeleteTask }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [activeTask, setActiveTask] = useState<TaskPopupInfo | null>(null);
 
     const getDaysInMonth = () => {
         const start = startOfMonth(currentDate);
@@ -30,10 +36,9 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, 
         });
     };
 
-    const renderTaskItem = (task: Task) => {
+    const renderTaskIndicator = (task: Task) => {
         const plant = plants.find(p => p.id === task.plantId);
         if (!plant) {
-            // Clean up orphaned tasks
             onDeleteTask(task.id);
             return null;
         }
@@ -41,37 +46,68 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, 
         return (
             <div 
                 key={task.id}
-                className="task-item"
-                style={{ borderLeftColor: TaskColors[task.type] }}
+                className="task-indicator"
+                style={{ backgroundColor: TaskColors[task.type] }}
                 onClick={(e) => {
                     e.stopPropagation();
-                    onTaskClick(task);
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setActiveTask({
+                        task,
+                        position: { x: rect.left, y: rect.bottom }
+                    });
                 }}
             >
-                <div className="task-content">
-                    <span>{plant.name} - {task.type}</span>
-                    {task.notes && <span className="task-notes">{task.notes}</span>}
+                <span className="task-plant-name">{plant.name}</span>
+            </div>
+        );
+    };
+
+    const renderTaskPopup = () => {
+        if (!activeTask) return null;
+        const plant = plants.find(p => p.id === activeTask.task.plantId);
+        if (!plant) return null;
+
+        return (
+            <div 
+                className="task-popup"
+                style={{
+                    left: activeTask.position.x,
+                    top: activeTask.position.y
+                }}
+            >
+                <div className="task-popup-header">
+                    <span className="task-type" style={{ color: TaskColors[activeTask.task.type] }}>
+                        {activeTask.task.type}
+                    </span>
+                    <span className="task-plant">{plant.name}</span>
                 </div>
-                <div className="task-actions">
+                {activeTask.task.notes && (
+                    <p className="task-notes">{activeTask.task.notes}</p>
+                )}
+                <div className="task-popup-actions">
                     <button 
-                        className="button-secondary button-small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onTaskClick(task);
+                        className="action-button"
+                        onClick={() => {
+                            onTaskClick(activeTask.task);
+                            setActiveTask(null);
                         }}
                     >
-                        Edit
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                        </svg>
                     </button>
                     <button 
-                        className="button-delete button-small"
-                        onClick={(e) => {
-                            e.stopPropagation();
+                        className="action-button delete"
+                        onClick={() => {
                             if (window.confirm('Delete this task?')) {
-                                onDeleteTask(task.id);
+                                onDeleteTask(activeTask.task.id);
                             }
+                            setActiveTask(null);
                         }}
                     >
-                        ×
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/>
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -82,7 +118,7 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, 
         const days = getDaysInMonth();
         
         return (
-            <div className="calendar-grid">
+            <div className="calendar-grid" onClick={() => setActiveTask(null)}>
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                     <div key={day} className="calendar-header">{day}</div>
                 ))}
@@ -90,11 +126,15 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, 
                     <div 
                         key={day.toString()} 
                         className="calendar-day"
-                        onClick={() => setSelectedDate(day)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(day);
+                            setActiveTask(null);
+                        }}
                     >
                         <span className="day-number">{format(day, 'd')}</span>
-                        <div className="task-list">
-                            {getTasksForDay(day).map(task => renderTaskItem(task))}
+                        <div className="task-indicators">
+                            {getTasksForDay(day).map(task => renderTaskIndicator(task))}
                         </div>
                     </div>
                 ))}
@@ -122,6 +162,7 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, plants, onTaskClick, 
                     onClose={() => setSelectedDate(null)}
                 />
             )}
+            {renderTaskPopup()}
         </div>
     );
 };
