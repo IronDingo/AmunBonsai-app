@@ -27,6 +27,8 @@ export interface Task {
     type: TaskType;
     date: Date;
     notes?: string;
+    completed: boolean;
+    completedAt?: Date;
 }
 
 export enum TaskType {
@@ -41,10 +43,13 @@ export enum TaskType {
 // Add serialize/deserialize helpers
 export const serializeTask = (task: Task): any => ({
     ...task,
-    date: task.date.toISOString()
+    date: task.date.toISOString(),
+    completedAt: task.completedAt?.toISOString()
 });
 
 export const deserializeTask = (data: any): Task => ({
     ...data,
-    date: new Date(data.date)
+    date: new Date(data.date),
+    completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+    completed: !!data.completed
 });

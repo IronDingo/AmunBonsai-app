@@ -22,11 +22,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
+    const task: Task = {
       id: `task-${Date.now()}`,
       date: selectedDate,
-      ...taskData
-    });
+      ...taskData,
+      completed: false
+    };
+    onSubmit(task);
     onClose();
   };
 

@@ -24,7 +24,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ selectedDate, plants, onSubm
             plantId: taskData.plantId,
             type: taskData.type,
             date: selectedDate,
-            notes: taskData.notes
+            notes: taskData.notes,
+            completed: editTask?.completed || false,
+            completedAt: editTask?.completedAt || undefined
         };
         onSubmit(task);
         onClose();

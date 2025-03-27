@@ -802,6 +802,26 @@ h1 {
   font-size: 0.9rem;
 }
 
+.summary-card.overdue {
+  background: #fff3f3;
+  border: 1px solid #dc3545;
+}
+
+.summary-card.overdue .count {
+  color: #dc3545;
+}
+
+.overdue-warning {
+  background: #fff3f3;
+  color: #dc3545;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+  animation: pulse 2s infinite;
+}
+
 .task-group {
   margin-bottom: 2rem;
   background: white;
@@ -815,6 +835,11 @@ h1 {
   margin-bottom: 1rem;
   color: var(--primary);
   font-size: 1.2rem;
+}
+
+.task-group:first-child .home-task-card {
+  border-left-color: #dc3545;
+  background: #fff3f3;
 }
 
 .home-task-card {
@@ -890,4 +915,10 @@ h1 {
 .task-actions .action-button.delete:hover {
   background: #dc3545;
   color: white;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
 }

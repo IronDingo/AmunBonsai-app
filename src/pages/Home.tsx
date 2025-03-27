@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task, PlantGroup, TaskType } from '../types/models';
-import { format, isToday, isTomorrow, isThisWeek } from 'date-fns';
+import { format, isToday, isTomorrow, isThisWeek, isPast, isFuture } from 'date-fns';
 import { TaskColors } from '../constants/taskColors';
 
 interface HomePageProps {
@@ -22,10 +22,28 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
   const sortedTasks = [...tasks].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const groupedTasks = {
-    today: sortedTasks.filter(task => isToday(task.date)),
-    tomorrow: sortedTasks.filter(task => isTomorrow(task.date)),
-    thisWeek: sortedTasks.filter(task => isThisWeek(task.date) && !isToday(task.date) && !isTomorrow(task.date)),
-    later: sortedTasks.filter(task => !isThisWeek(task.date))
+    overdue: sortedTasks.filter(task => 
+      isPast(task.date) && !isToday(task.date) && !task.completed
+    ),
+    today: sortedTasks.filter(task => 
+      isToday(task.date) && !task.completed
+    ),
+    tomorrow: sortedTasks.filter(task => 
+      isTomorrow(task.date) && !task.completed
+    ),
+    thisWeek: sortedTasks.filter(task => 
+      isThisWeek(task.date) && 
+      isFuture(task.date) &&
+      !isToday(task.date) && 
+      !isTomorrow(task.date) &&
+      !task.completed
+    ),
+    upcoming: sortedTasks.filter(task => 
+      !isThisWeek(task.date) && 
+      isFuture(task.date) &&
+      !task.completed
+    ),
+    completed: sortedTasks.filter(task => task.completed),
   };
 
   const renderTaskGroup = (tasks: Task[], title: string) => {
@@ -75,6 +93,10 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
       <div className="home-header">
         <h1>Welcome to BonsaiApp</h1>
         <div className="task-summary">
+          <div className="summary-card overdue">
+            <span className="count">{groupedTasks.overdue.length}</span>
+            <span className="label">Overdue</span>
+          </div>
           <div className="summary-card">
             <span className="count">{groupedTasks.today.length}</span>
             <span className="label">Today</span>
@@ -91,10 +113,17 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
       </div>
       
       <div className="tasks-container">
+        {groupedTasks.overdue.length > 0 && (
+          <div className="overdue-warning">
+            ⚠️ You have {groupedTasks.overdue.length} overdue tasks
+          </div>
+        )}
+        {renderTaskGroup(groupedTasks.overdue, "Overdue Tasks")}
         {renderTaskGroup(groupedTasks.today, "Today's Tasks")}
         {renderTaskGroup(groupedTasks.tomorrow, "Tomorrow's Tasks")}
         {renderTaskGroup(groupedTasks.thisWeek, "This Week")}
-        {renderTaskGroup(groupedTasks.later, "Upcoming")}
+        {renderTaskGroup(groupedTasks.upcoming, "Upcoming")}
+        {renderTaskGroup(groupedTasks.completed, "Completed Tasks")}
       </div>
     </div>
   );
