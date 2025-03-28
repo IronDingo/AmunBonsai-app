@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PlantGroup, Plant } from '../types/models';
-import { format } from 'date-fns';
+import { PlantGroup, Plant, Task, TaskType } from '../types/models';
+import { TaskColors } from '../constants/taskColors';
+import { format, isPast, isFuture } from 'date-fns';
 import { DEFAULT_PLANT_IMAGE } from '../assets/constants';
 
 interface PlantGroupsProps {
@@ -11,6 +12,8 @@ interface PlantGroupsProps {
   onUpdateGroup: (group: PlantGroup) => void;
   onDeleteGroup: (groupId: string) => void;
   onDeletePlant: (groupId: string, plantId: string) => void;
+  tasks: Task[];
+  onTaskComplete: (taskId: string, type: TaskType, plantId: string) => void;
 }
 
 interface ExpandedPlant {
@@ -30,7 +33,7 @@ interface PlantFormData {
   fertilizer: string;
 }
 
-const PlantGroups: React.FC<PlantGroupsProps> = ({ groups, onAddGroup, onAddPlant, onUpdatePlant, onUpdateGroup, onDeleteGroup, onDeletePlant }) => {
+const PlantGroups: React.FC<PlantGroupsProps> = ({ groups, onAddGroup, onAddPlant, onUpdatePlant, onUpdateGroup, onDeleteGroup, onDeletePlant, tasks, onTaskComplete }) => {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -222,7 +225,15 @@ const PlantGroups: React.FC<PlantGroupsProps> = ({ groups, onAddGroup, onAddPlan
 
   const renderPlantDetails = (plant: Plant) => {
     if (!expandedPlant || expandedPlant.plantId !== plant.id) return null;
-  
+
+    const plantTasks = tasks.filter(t => t.plantId === plant.id);
+    const overdueTasks = plantTasks.filter(t => !t.completed && isPast(t.date));
+    const upcomingTasks = plantTasks.filter(t => !t.completed && isFuture(t.date));
+    const lastCompletedTasks = plantTasks
+      .filter(t => t.completed)
+      .sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime())
+      .slice(0, 3);
+
     return (
       <div className="plant-details">
         <div className="plant-images">
@@ -239,6 +250,58 @@ const PlantGroups: React.FC<PlantGroupsProps> = ({ groups, onAddGroup, onAddPlan
           </button>
         </div>
         <div className="plant-info">
+          <div className="task-history-section">
+            <h3>Last Actions</h3>
+            {lastCompletedTasks.length > 0 ? (
+              lastCompletedTasks.map(task => (
+                <div key={task.id} className="task-history-item">
+                  <span className="task-type" style={{ color: TaskColors[task.type] }}>
+                    {task.type}
+                  </span>
+                  <span className="task-date">
+                    {format(task.completedAt!, 'MMM d, yyyy')}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p>No completed tasks</p>
+            )}
+          </div>
+
+          {overdueTasks.length > 0 && (
+            <div className="task-section overdue">
+              <h3>Overdue</h3>
+              {overdueTasks.map(task => (
+                <div key={task.id} className="task-item">
+                  <span className="task-type" style={{ color: TaskColors[task.type] }}>
+                    {task.type}
+                  </span>
+                  <span className="task-date">{format(task.date, 'MMM d')}</span>
+                  <button 
+                    className="action-button complete"
+                    onClick={() => onTaskComplete(task.id, task.type, task.plantId)}
+                  >
+                    ✓
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {upcomingTasks.length > 0 && (
+            <div className="task-section upcoming">
+              <h3>Upcoming</h3>
+              {upcomingTasks.map(task => (
+                <div key={task.id} className="task-item">
+                  <span className="task-type" style={{ color: TaskColors[task.type] }}>
+                    {task.type}
+                  </span>
+                  <span className="task-date">{format(task.date, 'MMM d')}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <p><strong>Last Watered:</strong> {plant.lastWatered ? format(plant.lastWatered, 'MMM d, yyyy') : 'Not recorded'}</p>
           <p><strong>Watering Frequency:</strong> {plant.waterSchedule ? `Every ${plant.waterSchedule} days` : 'Not set'}</p>
           <p><strong>Last Fertilized:</strong> {plant.lastFertilized ? format(plant.lastFertilized, 'MMM d, yyyy') : 'Not recorded'}</p>

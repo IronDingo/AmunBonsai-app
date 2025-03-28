@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Task, PlantGroup, TaskType } from '../types/models';
 import { format, isToday, isTomorrow, isThisWeek, isPast, isFuture } from 'date-fns';
 import { TaskColors } from '../constants/taskColors';
@@ -11,6 +11,8 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTaskDelete }) => {
+  const [focusedGroup, setFocusedGroup] = useState<string | null>(null);
+
   const getPlantName = (plantId: string) => {
     for (const group of groups) {
       const plant = group.plants.find(p => p.id === plantId);
@@ -46,13 +48,26 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
     completed: sortedTasks.filter(task => task.completed),
   };
 
-  const renderTaskGroup = (tasks: Task[], title: string) => {
+  const handleFocusGroup = (groupKey: string) => {
+    setFocusedGroup(focusedGroup === groupKey ? null : groupKey);
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isTop = target.scrollTop === 0;
+    const isBottom = target.scrollHeight - target.scrollTop === target.clientHeight;
+    
+    target.closest('.task-group')?.classList.toggle('scrolled-top', isTop);
+    target.closest('.task-group')?.classList.toggle('scrolled-bottom', isBottom);
+  };
+
+  const renderTaskGroup = (tasks: Task[], title: string, key: string) => {
     if (tasks.length === 0) return null;
 
     return (
-      <div className="task-group">
+      <div className={`task-group ${focusedGroup === key ? 'focused' : ''}`}>
         <h2>{title}</h2>
-        <div className="task-list">
+        <div className="task-list" onScroll={handleScroll}>
           {tasks.map(task => (
             <div 
               key={task.id} 
@@ -93,37 +108,54 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
       <div className="home-header">
         <h1>Welcome to BonsaiApp</h1>
         <div className="task-summary">
-          <div className="summary-card overdue">
+          <div 
+            className={`summary-card overdue ${focusedGroup === 'overdue' ? 'focused' : ''} ${groupedTasks.overdue.length === 0 ? 'empty' : ''}`}
+            onClick={() => handleFocusGroup('overdue')}
+          >
             <span className="count">{groupedTasks.overdue.length}</span>
             <span className="label">Overdue</span>
           </div>
-          <div className="summary-card">
+          <div 
+            className={`summary-card ${focusedGroup === 'today' ? 'focused' : ''} ${groupedTasks.today.length === 0 ? 'empty' : ''}`}
+            onClick={() => handleFocusGroup('today')}
+          >
             <span className="count">{groupedTasks.today.length}</span>
             <span className="label">Today</span>
           </div>
-          <div className="summary-card">
+          <div 
+            className={`summary-card ${focusedGroup === 'tomorrow' ? 'focused' : ''} ${groupedTasks.tomorrow.length === 0 ? 'empty' : ''}`}
+            onClick={() => handleFocusGroup('tomorrow')}
+          >
             <span className="count">{groupedTasks.tomorrow.length}</span>
             <span className="label">Tomorrow</span>
           </div>
-          <div className="summary-card">
+          <div 
+            className={`summary-card ${focusedGroup === 'thisWeek' ? 'focused' : ''} ${groupedTasks.thisWeek.length === 0 ? 'empty' : ''}`}
+            onClick={() => handleFocusGroup('thisWeek')}
+          >
             <span className="count">{groupedTasks.thisWeek.length}</span>
             <span className="label">This Week</span>
           </div>
         </div>
       </div>
       
-      <div className="tasks-container">
+      <div className={`tasks-container ${focusedGroup ? 'has-focus' : ''}`}>
         {groupedTasks.overdue.length > 0 && (
           <div className="overdue-warning">
             ⚠️ You have {groupedTasks.overdue.length} overdue tasks
           </div>
         )}
-        {renderTaskGroup(groupedTasks.overdue, "Overdue Tasks")}
-        {renderTaskGroup(groupedTasks.today, "Today's Tasks")}
-        {renderTaskGroup(groupedTasks.tomorrow, "Tomorrow's Tasks")}
-        {renderTaskGroup(groupedTasks.thisWeek, "This Week")}
-        {renderTaskGroup(groupedTasks.upcoming, "Upcoming")}
-        {renderTaskGroup(groupedTasks.completed, "Completed Tasks")}
+        {Object.entries(groupedTasks).map(([key, tasks]) => (
+          renderTaskGroup(
+            tasks, 
+            key === 'overdue' ? "Overdue Tasks" :
+            key === 'today' ? "Today's Tasks" :
+            key === 'tomorrow' ? "Tomorrow's Tasks" :
+            key === 'thisWeek' ? "This Week" :
+            key === 'upcoming' ? "Upcoming" : "Completed Tasks",
+            key
+          )
+        ))}
       </div>
     </div>
   );

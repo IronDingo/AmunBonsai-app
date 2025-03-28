@@ -130,6 +130,8 @@ const App: React.FC = () => {
             element={
               <PlantGroups
                 groups={groups}
+                tasks={tasks}
+                onTaskComplete={handleTaskComplete}
                 onAddGroup={handleAddGroup}
                 onAddPlant={handleAddPlant}
                 onUpdatePlant={handleUpdatePlant}
