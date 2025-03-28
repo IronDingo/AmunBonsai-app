@@ -7,6 +7,12 @@
   --text: #333333;
   --background: #FFFFFF;
   --accent: #E6B17E;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-all: all var(--transition-fast);
+  --transition-transform: transform var(--transition-fast);
+  --transition-opacity: opacity var(--transition-fast);
 }
 
 body {
@@ -57,7 +63,6 @@ h1 {
   display: flex;
   flex-direction: column;
   background: white;
-  transition: all 0.2s ease;
 }
 
 .calendar-day:hover {
@@ -140,7 +145,6 @@ h1 {
   align-items: center;
   color: white;
   cursor: pointer;
-  transition: transform 0.2s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -217,7 +221,6 @@ h1 {
   flex-wrap: wrap;
   gap: 2rem;
   padding: 2rem 0;
-  transition: all 0.3s ease-in-out;
 }
 
 .group-card {
@@ -227,7 +230,6 @@ h1 {
   overflow: hidden;
   background: white;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  transition: all 0.3s ease-in-out, flex-basis 0.5s ease-in-out;
   will-change: flex-basis;
   /* Add aspect ratio to force square */
   aspect-ratio: 1;
@@ -244,7 +246,6 @@ h1 {
   aspect-ratio: auto;
   max-height: 600px;
   margin-bottom: 2rem;
-  transition: all 0.3s ease-in-out, flex-basis 0.5s ease-in-out;
 }
 
 .group-card.expanded .group-header {
@@ -302,7 +303,6 @@ h1 {
   display: flex;
   gap: 0.5rem;
   opacity: 0;
-  transition: opacity 0.2s ease;
 }
 
 .group-card:hover .group-actions {
@@ -319,7 +319,6 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
 }
 
 .action-button:hover {
@@ -336,8 +335,6 @@ h1 {
 .plant-list {
   max-height: 0;
   overflow: hidden;
-  transition: all 0.5s ease-in-out;
-  background: var(--background);
 }
 
 .group-card.expanded .plant-list {
@@ -358,7 +355,6 @@ h1 {
   padding: 10px;
   margin: 10px 0;
   overflow: hidden;
-  transition: all 0.2s ease;
 }
 
 .plant-card.expanded {
@@ -432,7 +428,6 @@ h1 {
   font-weight: 500;
   min-width: 120px;
   cursor: pointer;
-  transition: all 0.2s ease;
   background: transparent;
   color: #dc3545;
   border: 1px solid #dc3545;
@@ -471,8 +466,6 @@ h1 {
   background: transparent;
   color: var(--secondary);
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .add-plant-button:hover {
@@ -496,7 +489,6 @@ h1 {
   text-decoration: none;
   color: var(--text);
   position: relative;
-  transition: all 0.2s ease;
 }
 
 .main-nav a::after {
@@ -507,7 +499,6 @@ h1 {
   width: 0;
   height: 2px;
   background-color: var(--accent);
-  transition: all 0.2s ease;
 }
 
 .main-nav a:hover::after {
@@ -585,7 +576,6 @@ h1 {
   font-weight: 500;
   min-width: 120px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .button-primary {
@@ -681,8 +671,6 @@ h1 {
   color: white;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .select-image-button:hover {
@@ -740,7 +728,6 @@ h1 {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  transition: all 0.3s ease;
   animation: fadeIn 0.3s ease;
 }
 
@@ -790,7 +777,6 @@ h1 {
   align-items: center;
   min-width: 100px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .summary-card .count {
@@ -850,7 +836,6 @@ h1 {
 .tasks-container.has-focus .task-group {
   opacity: 0.3;
   transform: scale(0.98);
-  transition: all 0.3s ease;
 }
 
 .tasks-container.has-focus .task-group:has(.home-task-card) {
@@ -864,7 +849,6 @@ h1 {
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   max-height: 400px;
@@ -887,74 +871,47 @@ h1 {
 .task-list {
   flex: 1;
   overflow-y: auto;
-  padding-right: 1rem;
-  margin-right: -1rem;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
   padding-top: 0.5rem;
+  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .task-list::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
-  background-color: transparent;
 }
 
 .task-list::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0,0,0,0.03);
   border-radius: 4px;
-  margin: 4px 0;
+  margin: 2px;
 }
 
 .task-list::-webkit-scrollbar-thumb {
   background: var(--secondary);
   border-radius: 4px;
   border: 2px solid transparent;
-  background-clip: content-box;
-  transition: all 0.2s ease;
+  background-clip: padding-box;
 }
 
 .task-list::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
   border: 2px solid transparent;
-  background-clip: content-box;
+  background-clip: padding-box;
 }
 
 /* Add fade effect for scrollable content */
-.task-group::before,
 .task-group::after {
   content: '';
   position: absolute;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 40px;
+  background: linear-gradient(transparent, white);
   pointer-events: none;
-  z-index: 1;
-  transition: opacity 0.2s ease;
-}
-
-.task-group::before {
-  top: 60px; /* Below the header */
-  background: linear-gradient(to bottom, white, transparent);
-  opacity: 0;
-}
-
-.task-group::after {
-  bottom: 0;
-  background: linear-gradient(to top, white, transparent);
-  opacity: 0;
-}
-
-.task-group:hover::before,
-.task-group:hover::after {
-  opacity: 1;
-}
-
-.task-group.scrolled-top::before {
-  opacity: 0;
-}
-
-.task-group.scrolled-bottom::after {
   opacity: 0;
 }
 
@@ -982,15 +939,18 @@ h1 {
   border-radius: 8px;
   margin-bottom: 0.5rem;
   border-left: 4px solid;
-  transition: transform 0.2s ease;
-}
-
-.home-task-card:hover {
-  transform: translateX(4px);
+  height: 80px; /* Fixed height for consistent scrolling */
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .task-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0; /* Allows text truncation to work */
 }
 
 .task-header {
@@ -1003,6 +963,10 @@ h1 {
 .plant-name {
   font-weight: 500;
   color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 .task-date {
@@ -1018,7 +982,9 @@ h1 {
 .task-notes {
   font-size: 0.8rem;
   color: #666;
-  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .task-actions {
@@ -1108,4 +1074,104 @@ h1 {
   color: var(--primary);
 }
 
-/* ...existing styles... */
+/* Base transitions for interactive elements */
+.calendar-day,
+.task-indicator,
+.action-button,
+.group-card,
+.plant-card,
+.button-primary,
+.button-secondary,
+.button-delete,
+.add-plant-button,
+.main-nav a,
+.summary-card,
+.home-task-card {
+  transition: var(--transition-all);
+}
+
+/* Special cases that need different timing */
+.group-card.expanded {
+  transition: 
+    transform var(--transition-medium),
+    box-shadow var(--transition-medium),
+    flex-basis var(--transition-slow);
+}
+
+.plant-list {
+  transition: all var(--transition-slow);
+}
+
+.task-group::before,
+.task-group::after {
+  transition: opacity var(--transition-fast);
+}
+
+/* Remove transition declarations from individual selectors and keep only unique properties */
+
+/* Floating Action Buttons */
+.floating-actions {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1000;
+}
+
+.floating-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  position: relative;
+  transition: var(--transition-all);
+}
+
+.floating-button.primary {
+  background: var(--primary);
+}
+
+.floating-button.secondary {
+  background: var(--secondary);
+}
+
+.floating-button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.floating-button::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 1rem);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem 1rem;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition-all);
+}
+
+.floating-button:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(-0.5rem);
+}
+
+.floating-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Task, PlantGroup, TaskType } from '../types/models';
 import { format, isToday, isTomorrow, isThisWeek, isPast, isFuture } from 'date-fns';
 import { TaskColors } from '../constants/taskColors';
+import { useNavigate } from 'react-router-dom';
 
 interface HomePageProps {
   tasks: Task[];
@@ -12,6 +13,7 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTaskDelete }) => {
   const [focusedGroup, setFocusedGroup] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getPlantName = (plantId: string) => {
     for (const group of groups) {
@@ -156,6 +158,27 @@ const HomePage: React.FC<HomePageProps> = ({ tasks, groups, onTaskComplete, onTa
             key
           )
         ))}
+      </div>
+
+      <div className="floating-actions">
+        <button 
+          className="floating-button secondary"
+          data-tooltip="Add New Plant"
+          onClick={() => navigate('/plants')}
+        >
+          <svg viewBox="0 0 24 24">
+            <path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zm0-18c-4.97 0-9 4.03-9 9 4.97 0 9-4.03 9-9zm0 0c0 4.97 4.03 9 9 9-4.97 0-9-4.03-9-9z"/>
+          </svg>
+        </button>
+        <button 
+          className="floating-button primary"
+          data-tooltip="Create New Task"
+          onClick={() => navigate('/calendar')}
+        >
+          <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
       </div>
     </div>
   );
