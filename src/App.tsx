@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Task, PlantGroup, Plant, TaskType, serializeTask, deserializeTask } from './types/models';
 import HomePage from './pages/Home';
 import { PlantGroups } from './pages/PlantGroups';
 import { Calendar } from './components/Calendar/Calendar';
 import './styles/app.css';
+import { exportData, downloadJson, importData } from './utils/dataExport';
 
 const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -16,6 +17,8 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('groups');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks.map(serializeTask)));
@@ -103,6 +106,35 @@ const App: React.FC = () => {
     })));
   };
 
+  const handleExportData = () => {
+    const data = exportData(tasks, groups);
+    const date = new Date().toISOString().split('T')[0];
+    downloadJson(data, `bonsai-data-${date}.json`);
+  };
+
+  const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const data = await importData(file);
+      setTasks(data.tasks.map(t => ({
+        ...t,
+        date: new Date(t.date),
+        completedAt: t.completedAt ? new Date(t.completedAt) : undefined
+      })));
+      setGroups(data.groups);
+      alert('Data imported successfully!');
+    } catch (error) {
+      alert('Failed to import data: ' + (error as Error).message);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const getAllPlants = () => groups.flatMap(group => group.plants);
 
   return (
@@ -112,6 +144,29 @@ const App: React.FC = () => {
           <Link to="/">Home</Link>
           <Link to="/plants">Plant Groups</Link>
           <Link to="/calendar">Calendar</Link>
+          <div className="nav-actions">
+            <button 
+              className="button-secondary"
+              onClick={handleExportData}
+              title="Export data to JSON"
+            >
+              Export Data
+            </button>
+            <button 
+              className="button-secondary"
+              onClick={() => fileInputRef.current?.click()}
+              title="Import data from JSON"
+            >
+              Import Data
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportData}
+              accept=".json"
+              style={{ display: 'none' }}
+            />
+          </div>
         </nav>
         <Routes>
           <Route 

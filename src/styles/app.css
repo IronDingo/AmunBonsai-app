@@ -477,7 +477,8 @@ h1 {
 /* Navigation */
 .main-nav {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   gap: 3rem;
   padding: 1.5rem 0;
   margin-bottom: 3rem;
@@ -503,6 +504,17 @@ h1 {
 
 .main-nav a:hover::after {
   width: 100%;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-actions .button-secondary {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* Modal and Form Styles */
